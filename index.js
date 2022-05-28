@@ -1,11 +1,11 @@
 const express = require('express')
 const cors = require('cors');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
-
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+console.log(process.env.STRIPE_SECRET_KEY);
 const port = process.env.PORT || 5000;
 
 app.use(cors());
@@ -37,6 +37,7 @@ async function run() {
     const orderCollection = client.db('Auto_Parts').collection('Clint_Order');
     const userCollection = client.db('Auto_Parts').collection('users');
     const paymentCollection = client.db('Auto_Parts').collection('payment');
+    const reviewCollection = client.db('Auto_Parts').collection('reviews');
 
     //user collect api
     app.get('/user', verifyJWT, async (req, res) => {
@@ -86,6 +87,14 @@ async function run() {
       const services = await cursor.toArray();
       res.send(services);
     });
+    
+    //Get All Review api
+    app.get('/review', async (req, res) => {
+      const query = {};
+      const cursor = reviewCollection.find(query);
+      const services = await cursor.toArray();
+      res.send(services);
+    });
 
          // DELETE
          app.delete('/products/:id', async (req, res) => {
@@ -122,6 +131,12 @@ async function run() {
       else {
         res.status(403).send({ message: 'forbidden access' })
       }
+    })
+    // order api
+    app.post('/review', async (req, res) => {
+      const review = req.body;
+      const result = await reviewCollection.insertOne(review);
+      res.send(result);
     })
     // order api
     app.post('/order', async (req, res) => {
