@@ -44,12 +44,34 @@ async function run() {
       const users = await userCollection.find().toArray();
       res.send(users);
     });
+    // single user collection api
+    app.get('/users/:email', async (req, res) => {
+      const email = req.params.email;
+      const query = {email: email};
+      const cursor = await userCollection.findOne(query);
+      res.send(cursor)
+    })
+
+    // update user collection api 
+    app.put('/updateuser/:email', async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: user,
+      };
+      const result = await userCollection.updateOne(filter, updateDoc, options);
+      res.send({success:true, result });
+    })
+    // admin email collection api 
     app.get('/admin/:email', async (req, res) => {
       const email = req.params.email;
       const user = await userCollection.findOne({ email: email });
       const isAdmin = user.role === 'admin';
       res.send({ admin: isAdmin })
     })
+    
     app.put('/user/admin/:email', verifyJWT, async (req, res) => {
       const email = req.params.email;
       const requester = req.decoded.email;
@@ -115,8 +137,14 @@ async function run() {
     app.get('/order/:id', verifyJWT, async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
-      const booking = await orderCollection.findOne(query);
-      res.send(booking);
+      const result = await orderCollection.findOne(query);
+      res.send(result);
+    })
+    app.delete('/order/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await orderCollection.deleteOne(query);
+      res.send(result);
     })
     //Order Collection API
     app.get('/order', verifyJWT, async (req, res) => {
