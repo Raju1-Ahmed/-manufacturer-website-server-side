@@ -33,6 +33,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
   try {
     await client.connect();
+    //Data Base File Collection
     const productsCollection = client.db('Auto_Parts').collection('Products');
     const orderCollection = client.db('Auto_Parts').collection('Clint_Order');
     const userCollection = client.db('Auto_Parts').collection('users');
@@ -72,6 +73,7 @@ async function run() {
       res.send({ admin: isAdmin })
     })
     
+    //single admin collection api
     app.put('/user/admin/:email', verifyJWT, async (req, res) => {
       const email = req.params.email;
       const requester = req.decoded.email;
@@ -89,6 +91,8 @@ async function run() {
       }
 
     })
+
+    //single user admin collection api
     app.put('/user/:email', async (req, res) => {
       const email = req.params.email;
       const user = req.body;
